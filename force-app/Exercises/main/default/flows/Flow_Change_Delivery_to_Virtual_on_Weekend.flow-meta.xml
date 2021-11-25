@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>53.0</apiVersion>
+    <assignments>
+        <name>Assignment010_Change_Location_to_Virtual</name>
+        <label>Assignment010 Change Location to Virtual</label>
+        <locationX>874</locationX>
+        <locationY>277</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Location__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue> Virtual</stringValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <decisions>
+        <name>Decision010_Determine_Flow_Trigger</name>
+        <label>Decision010 Determine Flow Trigger</label>
+        <locationX>430</locationX>
+        <locationY>94</locationY>
+        <defaultConnector>
+            <targetReference>Decision020_Did_Start_Date_Change</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Triggered by Update</defaultConnectorLabel>
+        <rules>
+            <name>Triggered_by_Create</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record__Prior</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Decision030_Does_Delivery_Start_on_Weekend</targetReference>
+            </connector>
+            <label>Triggered by Create</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Decision020_Did_Start_Date_Change</name>
+        <label>Decision020 Did Start Date Change?</label>
+        <locationX>613</locationX>
+        <locationY>298</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Start_Date_Changed</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Start_Date__c</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <elementReference>$Record__Prior.Start_Date__c</elementReference>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Decision030_Does_Delivery_Start_on_Weekend</targetReference>
+            </connector>
+            <label>Start Date Changed</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Decision030_Does_Delivery_Start_on_Weekend</name>
+        <label>Decision030 Does Delivery Start on Weekend?</label>
+        <locationX>763</locationX>
+        <locationY>113</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Starts_on_Weekend</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>formulaIsWeekend</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Assignment010_Change_Location_to_Virtual</targetReference>
+            </connector>
+            <label>Starts on Weekend</label>
+        </rules>
+    </decisions>
+    <formulas>
+        <name>formulaIsWeekend</name>
+        <dataType>Boolean</dataType>
+        <expression>WeekDay({!$Record.Start_Date__c})==1 || WeekDay({!$Record.Start_Date__c})==7</expression>
+    </formulas>
+    <interviewLabel>Flow Change Delivery to Virtual on Weekend {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Flow Change Delivery to Virtual on Weekend</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>FREE_FORM_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>50</locationY>
+        <connector>
+            <targetReference>Decision010_Determine_Flow_Trigger</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Status__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Scheduled</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>Location__c</field>
+            <operator>NotEqualTo</operator>
+            <value>
+                <stringValue>Virtual</stringValue>
+            </value>
+        </filters>
+        <object>Course_Delivery__c</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>
